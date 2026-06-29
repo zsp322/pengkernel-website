@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>agent-watchdog — Runtime Loop Detection for AI Agents</title>
+  <meta name="description" content="Runtime loop and deadlock detection for LangGraph multi-agent systems. Detect argument loops, prevent token runaway, and ship AI pipelines that don't burn your budget." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../styles.css" />
+  <script>
+    (function() {
+      if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-inner">
+      <a href="../../" class="logo">
+        <span class="logo-icon">🐕</span>
+        agent-watchdog
+      </a>
+      <div class="nav-links">
+        <a href="../../" class="back-link">← PengKernel</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#features">Features</a>
+        <a href="#install">Quick Start</a>
+        <a href="#pricing">Pricing</a>
+        <a href="https://www.npmjs.com/package/agent-watchdog" target="_blank" class="nav-cta">npm →</a>
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle theme">
+          <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="badge">
+      <span class="badge-dot"></span>
+      v0.1.0 · Available on npm
+    </div>
+    <h1>Runtime Loop Detection<br /><span class="gradient-text">for AI Agents</span></h1>
+    <p class="hero-sub">
+      Multi-agent systems loop indefinitely, burning tokens before anyone notices.
+      agent-watchdog intervenes at runtime — the same way a circuit breaker works
+      in distributed systems.
+    </p>
+    <div class="hero-actions">
+      <a href="https://www.npmjs.com/package/agent-watchdog" target="_blank" class="btn-primary">
+        Get Started Free →
+      </a>
+    </div>
+    <div class="install-box">
+      <span class="install-prompt">$</span>
+      <span class="install-cmd">npm install agent-watchdog</span>
+      <button class="copy-btn" onclick="copyInstall(this)" title="Copy">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      </button>
+    </div>
+
+    <!-- METRICS -->
+    <div class="metrics">
+      <div class="metric">
+        <span class="metric-value">55%</span>
+        <span class="metric-label">Default similarity threshold</span>
+      </div>
+      <div class="metric-divider"></div>
+      <div class="metric">
+        <span class="metric-value">&lt;1ms</span>
+        <span class="metric-label">Detection overhead per cycle</span>
+      </div>
+      <div class="metric-divider"></div>
+      <div class="metric">
+        <span class="metric-value">0</span>
+        <span class="metric-label">Tokens wasted after intervention</span>
+      </div>
+      <div class="metric-divider"></div>
+      <div class="metric">
+        <span class="metric-value">3</span>
+        <span class="metric-label">Detection signals</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROBLEM -->
+  <section class="section problem" id="problem">
+    <div class="section-inner">
+      <div class="section-label">The Problem</div>
+      <h2>Multi-agent AI fails<br />in ways you can't see</h2>
+      <p class="section-sub">
+        Existing observability tools show you what happened <em>after the fact</em>.
+        By then, you've already burned tokens and hit your budget ceiling.
+      </p>
+      <div class="cards-4">
+        <div class="card">
+          <div class="card-icon danger">⟳</div>
+          <h3>Argument Loops</h3>
+          <p>Two agents debate the same point in different words, indefinitely, with no exit condition.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon warning">💸</div>
+          <h3>Token Runaway</h3>
+          <p>An uncapped loop burns through your entire API budget before anyone notices the graph is stuck.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon caution">⏸</div>
+          <h3>Silent Deadlocks</h3>
+          <p>Agents wait on each other's output and never produce a result. The graph stalls silently.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon muted">📋</div>
+          <h3>Post-hoc Logs Only</h3>
+          <p>LangSmith and AgentOps are powerful, but they tell you what went wrong — not in time to stop it.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section how-it-works" id="how-it-works">
+    <div class="section-inner">
+      <div class="section-label">Under the Hood</div>
+      <h2>Four-layer runtime protection</h2>
+      <p class="section-sub">
+        agent-watchdog runs inside your LangGraph conditional edges — no external calls,
+        no latency budget, no data leaving your environment.
+      </p>
+      <div class="layers">
+        <div class="layer">
+          <div class="layer-num">01</div>
+          <div class="layer-body">
+            <h4>Message Window Sampling</h4>
+            <p>Collects the last <code>N×2</code> messages from the graph state on every cycle. Window size is configurable.</p>
+          </div>
+        </div>
+        <div class="layer">
+          <div class="layer-num">02</div>
+          <div class="layer-body">
+            <h4>Jaccard Similarity Scoring</h4>
+            <p>Computes average pairwise word-set overlap between the recent window and the previous window. Catches semantic repetition even when exact wording differs.</p>
+          </div>
+        </div>
+        <div class="layer">
+          <div class="layer-num">03</div>
+          <div class="layer-body">
+            <h4>Threshold Evaluation</h4>
+            <p>If the similarity score exceeds your configured threshold (default 55%), the watchdog signals <code class="signal loop">loop_detected</code>. If the cycle count exceeds your limit, it signals <code class="signal limit">limit_reached</code>.</p>
+          </div>
+        </div>
+        <div class="layer">
+          <div class="layer-num">04</div>
+          <div class="layer-body">
+            <h4>Runtime Intervention</h4>
+            <p>The router returns <code>END</code> before the next agent fires. Zero additional tokens consumed. An intervention report is generated for your logging pipeline.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section features" id="features">
+    <div class="section-inner">
+      <div class="section-label">Detection Capabilities</div>
+      <h2>Everything you need to ship<br />safe multi-agent pipelines</h2>
+      <div class="feat-grid">
+        <div class="feat-card">
+          <div class="feat-icon">🔁</div>
+          <div class="feat-tag tag-red">CRITICAL</div>
+          <h4>Loop Detection</h4>
+          <p>Detects argumentative cycles using Jaccard word-set similarity across sliding message windows.</p>
+          <div class="feat-stat">Similarity threshold · configurable</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">🔢</div>
+          <div class="feat-tag tag-orange">HIGH</div>
+          <h4>Iteration Limits</h4>
+          <p>Hard cap on graph cycles. If the graph exceeds <code>maxIterations</code>, the watchdog halts regardless of similarity.</p>
+          <div class="feat-stat">Default cap · 10 iterations</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">⚙️</div>
+          <div class="feat-tag tag-yellow">CONFIG</div>
+          <h4>Configurable Thresholds</h4>
+          <p>Tune similarity threshold, window size, and iteration cap independently per graph or per edge.</p>
+          <div class="feat-stat">3 tunable parameters</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">📡</div>
+          <div class="feat-tag tag-green">SAFE</div>
+          <h4>Intervention Callbacks</h4>
+          <p>Wire <code>onIntervene</code> to your own logger, alerting system, or monitoring pipeline. Fully optional.</p>
+          <div class="feat-stat">Zero deps · stdout fallback</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">📄</div>
+          <div class="feat-tag tag-green">SAFE</div>
+          <h4>Intervention Reports</h4>
+          <p>Human-readable diagnosis on every intervention: trigger, iteration count, similarity score, last exchanges, and recommended action.</p>
+          <div class="feat-stat">Structured · machine-readable</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">🔒</div>
+          <div class="feat-tag tag-green">SAFE</div>
+          <h4>Zero External Calls</h4>
+          <p>All detection runs in-process. No data leaves your environment, no API keys required for watchdog itself.</p>
+          <div class="feat-stat">Offline · air-gapped friendly</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUICK START -->
+  <section class="section install-section" id="install">
+    <div class="section-inner">
+      <div class="section-label">Quick Start</div>
+      <h2>Three steps to a safer graph</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h4>Install</h4>
+            <p>Add agent-watchdog to your project. Requires <code>@langchain/langgraph</code> as a peer dependency.</p>
+            <div class="code-block">
+              <div class="code-header"><span class="code-lang">bash</span></div>
+              <pre>npm install agent-watchdog</pre>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h4>Configure</h4>
+            <p>Create a watchdog instance with your thresholds. All parameters are optional — defaults work out of the box.</p>
+            <div class="code-block">
+              <div class="code-header"><span class="code-lang">typescript</span></div>
+              <pre><span class="kw">import</span> { AgentWatchdog, createWatchdogRouter } <span class="kw">from</span> <span class="str">"agent-watchdog"</span>;
+<span class="kw">import</span> { END } <span class="kw">from</span> <span class="str">"@langchain/langgraph"</span>;
+
+<span class="kw">const</span> watchdog = <span class="kw">new</span> <span class="fn">AgentWatchdog</span>({
+  maxIterations: <span class="num">10</span>,
+  similarityThreshold: <span class="num">0.55</span>,
+  windowSize: <span class="num">4</span>,
+});</pre>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h4>Drop into your graph</h4>
+            <p>Replace any conditional edge with the watchdog router. It halts to <code>END</code> automatically on detection.</p>
+            <div class="code-block">
+              <div class="code-header"><span class="code-lang">typescript</span></div>
+              <pre><span class="kw">const</span> router = <span class="fn">createWatchdogRouter</span>(watchdog, <span class="str">"agent_a"</span>, (report) => {
+  myLogger.<span class="fn">warn</span>(report);
+});
+
+graph.<span class="fn">addConditionalEdges</span>(<span class="str">"agent_b"</span>, router, {
+  agent_a: <span class="str">"agent_a"</span>,
+  [END]: END,
+});</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEMO -->
+  <section class="section demo-section" id="demo">
+    <div class="section-inner">
+      <div class="section-label">See It in Action</div>
+      <h2>Intervention report</h2>
+      <p class="section-sub">
+        When agent-watchdog detects a loop, it halts the graph and surfaces a
+        structured report — no guesswork, no post-hoc analysis.
+      </p>
+      <div class="terminal">
+        <div class="terminal-header">
+          <div class="terminal-dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <span class="terminal-title">agent-watchdog · intervention report</span>
+        </div>
+        <div class="terminal-body">
+          <pre><span class="t-dim">============================================================</span>
+<span class="t-bright">  AGENT WATCHDOG — INTERVENTION REPORT</span>
+<span class="t-dim">============================================================</span>
+  <span class="t-label">Trigger    :</span> <span class="t-danger">loop_detected</span>
+  <span class="t-label">Iterations :</span> <span class="t-value">8</span>
+  <span class="t-label">Similarity :</span> <span class="t-warn">71%</span>  <span class="t-dim">(threshold: 55%)</span>
+  <span class="t-label">Messages   :</span> <span class="t-value">9</span>
+
+  <span class="t-label">Last exchange:</span>
+    <span class="t-dim">[Optimist]</span>  While AI accelerates scientific discovery, we must ensure equit...
+    <span class="t-dim">[Pessimist]</span> The acceleration you describe comes at the cost of concentrating...
+    <span class="t-dim">[Optimist]</span>  Equitable access is precisely why open-source AI development mat...
+    <span class="t-dim">[Pessimist]</span> Open-source development doesn't solve the compute access problem...
+
+  <span class="t-label">Diagnosis  :</span> <span class="t-muted">agents are recycling the same arguments.</span>
+  <span class="t-label">Action     :</span> <span class="t-green">graph halted. No further tokens consumed.</span>
+<span class="t-dim">============================================================</span></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROADMAP -->
+  <section class="section roadmap-section" id="roadmap">
+    <div class="section-inner">
+      <div class="section-label">Roadmap</div>
+      <h2>What's coming next</h2>
+      <div class="roadmap-grid">
+        <div class="roadmap-item planned">
+          <div class="roadmap-status">Planned</div>
+          <h4>Deadlock Detection</h4>
+          <p>Detect mutual wait patterns where agents block on each other and no output is produced.</p>
+        </div>
+        <div class="roadmap-item planned">
+          <div class="roadmap-status">Planned</div>
+          <h4>Token Budget Monitoring</h4>
+          <p>Early-warning callbacks when cumulative token usage approaches configurable budget limits.</p>
+        </div>
+        <div class="roadmap-item planned">
+          <div class="roadmap-status">Planned</div>
+          <h4>Pluggable Similarity Backends</h4>
+          <p>Swap in embeddings or TF-IDF for richer semantic loop detection beyond word-set Jaccard.</p>
+        </div>
+        <div class="roadmap-item planned">
+          <div class="roadmap-status">Planned</div>
+          <h4>CrewAI &amp; AutoGen Adapters</h4>
+          <p>Bring agent-watchdog's protection to other multi-agent frameworks beyond LangGraph.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="section pricing-section" id="pricing">
+    <div class="section-inner">
+      <div class="section-label">Pricing</div>
+      <h2>Open source, with support for teams.</h2>
+      <p class="section-sub">
+        The core library is MIT licensed and free forever.
+        Need help integrating into your production pipeline? We offer hands-on support and consulting.
+      </p>
+      <div class="pricing-grid pricing-grid-two">
+
+        <!-- FREE -->
+        <div class="plan">
+          <div class="plan-header">
+            <div class="plan-name">Open Source</div>
+            <div class="plan-price"><span class="plan-amount">$0</span><span class="plan-period">forever</span></div>
+            <p class="plan-desc">Self-hosted. MIT licensed. No strings attached.</p>
+          </div>
+          <a href="https://www.npmjs.com/package/agent-watchdog" target="_blank" class="plan-btn plan-btn-outline">Install on npm →</a>
+          <ul class="plan-features">
+            <li><span class="check">✓</span> Loop detection (Jaccard similarity)</li>
+            <li><span class="check">✓</span> Tool call loop detection</li>
+            <li><span class="check">✓</span> State regression detection</li>
+            <li><span class="check">✓</span> Iteration limit enforcement</li>
+            <li><span class="check">✓</span> Configurable thresholds</li>
+            <li><span class="check">✓</span> Structured intervention reports</li>
+            <li><span class="check">✓</span> MIT license — use anywhere</li>
+          </ul>
+        </div>
+
+        <!-- SUPPORT -->
+        <div class="plan plan-featured">
+          <div class="plan-header">
+            <div class="plan-name">Support &amp; Consulting</div>
+            <div class="plan-price"><span class="plan-amount">Custom</span></div>
+            <p class="plan-desc">For teams that need hands-on help shipping reliable agent pipelines.</p>
+          </div>
+          <a href="mailto:hello@pengkernel.com?subject=agent-watchdog Support" class="plan-btn plan-btn-primary">Get in Touch →</a>
+          <p class="plan-contact">hello@pengkernel.com</p>
+          <ul class="plan-features">
+            <li><span class="check">✓</span> Integration consulting</li>
+            <li><span class="check">✓</span> Threshold tuning for your use case</li>
+            <li><span class="check">✓</span> Priority email support</li>
+            <li><span class="check">✓</span> Architecture review</li>
+            <li><span class="check">✓</span> Custom detection logic</li>
+            <li><span class="check">✓</span> Direct access to the author</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section cta-section">
+    <div class="section-inner cta-inner">
+      <h2>Stop your agents from looping.</h2>
+      <p>Drop agent-watchdog into any LangGraph graph in under 5 minutes.</p>
+      <div class="cta-actions">
+        <a href="https://www.npmjs.com/package/agent-watchdog" target="_blank" class="btn-primary btn-lg">
+          Install on npm →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-left">
+        <span class="logo">
+          <span class="logo-icon">🐕</span>
+          agent-watchdog
+        </span>
+        <p>Runtime reliability for multi-agent AI systems.</p>
+        <p class="footer-copy">MIT License · Built by PengKernel LLC</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h5>Package</h5>
+          <a href="https://www.npmjs.com/package/agent-watchdog" target="_blank">npm</a>
+        </div>
+        <div class="footer-col">
+          <h5>Company</h5>
+          <a href="../../">PengKernel LLC</a>
+          <a href="mailto:hello@pengkernel.com">hello@pengkernel.com</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      if (isDark) {
+        html.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+      } else {
+        html.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    function copyInstall(btn) {
+      navigator.clipboard.writeText('npm install agent-watchdog');
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(() => {
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
