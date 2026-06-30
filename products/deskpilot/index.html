@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DeskPilot — AI Support Agent That Knows When to Escalate</title>
+  <meta name="description" content="A RAG-based customer support agent that answers from your docs and hands off to a human when it isn't confident — instead of guessing." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../styles.css" />
+  <script>
+    (function() {
+      if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-inner">
+      <a href="../../" class="logo">
+        <span class="logo-icon">🎧</span>
+        DeskPilot
+      </a>
+      <div class="nav-links">
+        <a href="../../" class="back-link">← PengKernel</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#features">Features</a>
+        <a href="#install">Quick Start</a>
+        <a href="#pricing">Pricing</a>
+        <a href="https://www.npmjs.com/package/deskpilot" target="_blank" class="nav-cta">npm →</a>
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle theme">
+          <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="badge">
+      <span class="badge-dot"></span>
+      v0.1.0 · Available on npm
+    </div>
+    <h1>The AI support agent<br /><span class="gradient-text">that knows when to shut up</span></h1>
+    <p class="hero-sub">
+      Most AI support bots answer everything — confidently, including the things
+      they're wrong about. DeskPilot answers from your docs, scores its own
+      confidence, and hands off to a human instead of guessing.
+    </p>
+    <div class="hero-actions">
+      <a href="https://www.npmjs.com/package/deskpilot" target="_blank" class="btn-primary">
+        Get Started Free →
+      </a>
+    </div>
+    <div class="install-box">
+      <span class="install-prompt">$</span>
+      <span class="install-cmd">npm install deskpilot</span>
+      <button class="copy-btn" onclick="copyInstall(this)" title="Copy">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      </button>
+    </div>
+
+    <!-- METRICS -->
+    <div class="metrics">
+      <div class="metric">
+        <span class="metric-value">0.12</span>
+        <span class="metric-label">Default confidence floor</span>
+      </div>
+      <div class="metric-divider"></div>
+      <div class="metric">
+        <span class="metric-value">2</span>
+        <span class="metric-label">Escalation triggers</span>
+      </div>
+      <div class="metric-divider"></div>
+      <div class="metric">
+        <span class="metric-value">0</span>
+        <span class="metric-label">Embedding API calls required</span>
+      </div>
+      <div class="metric-divider"></div>
+      <div class="metric">
+        <span class="metric-value">3</span>
+        <span class="metric-label">Steps to integrate</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROBLEM -->
+  <section class="section problem" id="problem">
+    <div class="section-inner">
+      <div class="section-label">The Problem</div>
+      <h2>Confident wrong answers<br />cost more than slow right ones</h2>
+      <p class="section-sub">
+        Generic chatbot wrappers will answer a billing dispute, a refund request,
+        or a question with no good source in your docs — just as fluently as
+        they answer "what are your hours." That fluency is the problem.
+      </p>
+      <div class="cards-4">
+        <div class="card">
+          <div class="card-icon danger">❓</div>
+          <h3>Out-of-Domain Guessing</h3>
+          <p>A question outside the knowledge base still gets a fluent, plausible-sounding answer — often wrong.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon warning">💳</div>
+          <h3>High-Stakes Autonomy</h3>
+          <p>Refunds, cancellations, and legal threats get handled by the same logic as "where's my package."</p>
+        </div>
+        <div class="card">
+          <div class="card-icon caution">📉</div>
+          <h3>No Confidence Signal</h3>
+          <p>Most chat widgets expose zero information about how sure the model actually is.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon muted">🔌</div>
+          <h3>Heavy Setup</h3>
+          <p>Vector DBs and embedding pipelines are overkill for a knowledge base of a few hundred FAQ articles.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section how-it-works" id="how-it-works">
+    <div class="section-inner">
+      <div class="section-label">Under the Hood</div>
+      <h2>Retrieval gates every answer</h2>
+      <p class="section-sub">
+        DeskPilot scores its own retrieval confidence before it ever calls the LLM —
+        no vector database required.
+      </p>
+      <div class="layers">
+        <div class="layer">
+          <div class="layer-num">01</div>
+          <div class="layer-body">
+            <h4>TF-IDF Knowledge Base</h4>
+            <p>Your docs are chunked and indexed with TF-IDF cosine similarity — no embedding API, no vector store, runs in-process.</p>
+          </div>
+        </div>
+        <div class="layer">
+          <div class="layer-num">02</div>
+          <div class="layer-body">
+            <h4>Confidence-Scored Retrieval</h4>
+            <p>Every query returns top-K chunks <em>and</em> a similarity score. That score doubles as a confidence signal for the next step.</p>
+          </div>
+        </div>
+        <div class="layer">
+          <div class="layer-num">03</div>
+          <div class="layer-body">
+            <h4>Escalation Gate</h4>
+            <p>Keyword match (<code class="signal loop">refund</code>, <code class="signal loop">lawyer</code>, <code class="signal loop">cancel</code>) or low retrieval confidence routes straight to a human — no LLM call, no guess.</p>
+          </div>
+        </div>
+        <div class="layer">
+          <div class="layer-num">04</div>
+          <div class="layer-body">
+            <h4>Grounded Response</h4>
+            <p>Only messages that clear the gate reach the LLM, which answers using retrieved context only and returns its sources.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section features" id="features">
+    <div class="section-inner">
+      <div class="section-label">Capabilities</div>
+      <h2>Everything you need to ship<br />a support agent you can trust</h2>
+      <div class="feat-grid">
+        <div class="feat-card">
+          <div class="feat-icon">📚</div>
+          <div class="feat-tag tag-red">CORE</div>
+          <h4>Zero-Setup Knowledge Base</h4>
+          <p>Add documents directly — chunking and TF-IDF indexing happen automatically, no embedding pipeline to stand up.</p>
+          <div class="feat-stat">In-memory · no vector DB</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">🚦</div>
+          <div class="feat-tag tag-orange">HIGH</div>
+          <h4>Escalation Gate</h4>
+          <p>Keyword triggers plus a configurable confidence floor decide, before any LLM call, whether a human should handle it.</p>
+          <div class="feat-stat">Default floor · 0.12 cosine score</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">📎</div>
+          <div class="feat-tag tag-yellow">TRUST</div>
+          <h4>Cited Sources</h4>
+          <p>Every answer returns the knowledge base chunks it was grounded in, so you can show citations or audit responses.</p>
+          <div class="feat-stat">Structured · machine-readable</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">💬</div>
+          <div class="feat-tag tag-green">SAFE</div>
+          <h4>Multi-Turn Sessions</h4>
+          <p>Conversation history is tracked per session, so follow-up questions stay grounded in prior context.</p>
+          <div class="feat-stat">Per-session memory</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">⚙️</div>
+          <div class="feat-tag tag-green">CONFIG</div>
+          <h4>Deep Customization</h4>
+          <p>Not a managed black box. Brand voice, escalation rules, confidence tolerance, and retrieval depth are all exposed at the API layer — tune the agent to your own policy instead of a vendor's defaults.</p>
+          <div class="feat-stat">4 tunable parameters · open core</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">🔒</div>
+          <div class="feat-tag tag-green">SAFE</div>
+          <h4>Answers Only From Your Docs</h4>
+          <p>The system prompt constrains the model to the retrieved context — no open-domain answers, no hallucinated policy.</p>
+          <div class="feat-stat">Grounded generation</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUICK START -->
+  <section class="section install-section" id="install">
+    <div class="section-inner">
+      <div class="section-label">Quick Start</div>
+      <h2>Three steps to a grounded agent</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h4>Install</h4>
+            <p>Add DeskPilot to your project. Requires an <code>ANTHROPIC_API_KEY</code> in your environment.</p>
+            <div class="code-block">
+              <div class="code-header"><span class="code-lang">bash</span></div>
+              <pre>npm install deskpilot</pre>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h4>Load your docs</h4>
+            <p>Add your FAQ or help-center articles to a knowledge base. Chunking and indexing happen automatically.</p>
+            <div class="code-block">
+              <div class="code-header"><span class="code-lang">typescript</span></div>
+              <pre><span class="kw">import</span> { DeskPilot, KnowledgeBase } <span class="kw">from</span> <span class="str">"deskpilot"</span>;
+
+<span class="kw">const</span> kb = <span class="kw">new</span> <span class="fn">KnowledgeBase</span>();
+kb.<span class="fn">addDocument</span>({
+  id: <span class="str">"shipping"</span>,
+  title: <span class="str">"Shipping Policy"</span>,
+  content: <span class="str">"Standard shipping takes 5-7 business days..."</span>,
+});</pre>
+            </div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h4>Chat</h4>
+            <p>Every response tells you whether it escalated, and why.</p>
+            <div class="code-block">
+              <div class="code-header"><span class="code-lang">typescript</span></div>
+              <pre><span class="kw">const</span> agent = <span class="kw">new</span> <span class="fn">DeskPilot</span>(kb);
+
+<span class="kw">const</span> response = <span class="kw">await</span> agent.<span class="fn">chat</span>(<span class="str">"session-123"</span>, <span class="str">"How long does shipping take?"</span>);
+console.<span class="fn">log</span>(response.answer, response.escalate);</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEMO -->
+  <section class="section demo-section" id="demo">
+    <div class="section-inner">
+      <div class="section-label">See It in Action</div>
+      <h2>Escalation in practice</h2>
+      <p class="section-sub">
+        Three real outputs from the included demo — note the third message escalates
+        without ever calling the LLM, because it matched a keyword trigger.
+      </p>
+      <div class="terminal">
+        <div class="terminal-header">
+          <div class="terminal-dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <span class="terminal-title">deskpilot · example:basic</span>
+        </div>
+        <div class="terminal-body">
+          <pre><span class="t-dim">Q:</span> How long does express shipping take?
+<span class="t-dim">A:</span> Express shipping takes 1-2 business days and costs an additional $15.
+   <span class="t-label">confidence=</span><span class="t-value">0.41</span> <span class="t-label">escalate=</span><span class="t-green">false</span>
+
+<span class="t-dim">Q:</span> Can I return an item after 40 days?
+<span class="t-dim">A:</span> Our return window is 30 days from delivery, so a 40-day-old order doesn't qualify for the standard return process.
+   <span class="t-label">confidence=</span><span class="t-value">0.38</span> <span class="t-label">escalate=</span><span class="t-green">false</span>
+
+<span class="t-dim">Q:</span> I want a refund and I'm talking to my lawyer about this.
+<span class="t-dim">A:</span> I want to make sure this gets handled correctly — I'm looping in a teammate who can help.
+   <span class="t-label">confidence=</span><span class="t-value">0.00</span> <span class="t-label">escalate=</span><span class="t-danger">true</span> <span class="t-dim">(matched escalation keyword: "refund")</span></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROADMAP -->
+  <section class="section roadmap-section" id="roadmap">
+    <div class="section-inner">
+      <div class="section-label">Roadmap</div>
+      <h2>What's coming next</h2>
+      <div class="roadmap-grid">
+        <div class="roadmap-item planned">
+          <div class="roadmap-status">Planned</div>
+          <h4>Embeddings-Based Retrieval</h4>
+          <p>Swap TF-IDF for a vector store once the knowledge base grows past a few thousand chunks or needs cross-lingual matching.</p>
+        </div>
+        <div class="roadmap-item planned">
+          <div class="roadmap-status">Planned</div>
+          <h4>Channel Adapters</h4>
+          <p>Zendesk, Intercom, and email ingestion/reply adapters so DeskPilot sits behind your existing support tooling.</p>
+        </div>
+        <div class="roadmap-item planned">
+          <div class="roadmap-status">Planned</div>
+          <h4>Human Handoff Webhooks</h4>
+          <p>Push escalations directly to Slack or email instead of just returning <code>escalate: true</code> to the caller.</p>
+        </div>
+        <div class="roadmap-item planned">
+          <div class="roadmap-status">Planned</div>
+          <h4>Persistent Sessions</h4>
+          <p>Move conversation history out of process memory and into Redis or a database for multi-instance deployments.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="section pricing-section" id="pricing">
+    <div class="section-inner">
+      <div class="section-label">Pricing</div>
+      <h2>Open source, with support for teams.</h2>
+      <p class="section-sub">
+        The core library is MIT licensed and free forever.
+        Need help integrating into your support stack? We offer hands-on support and consulting.
+      </p>
+      <div class="pricing-grid pricing-grid-two">
+
+        <!-- FREE -->
+        <div class="plan">
+          <div class="plan-header">
+            <div class="plan-name">Open Source</div>
+            <div class="plan-price"><span class="plan-amount">$0</span><span class="plan-period">forever</span></div>
+            <p class="plan-desc">Self-hosted. MIT licensed. No strings attached.</p>
+          </div>
+          <a href="https://www.npmjs.com/package/deskpilot" target="_blank" class="plan-btn plan-btn-outline">Install on npm →</a>
+          <ul class="plan-features">
+            <li><span class="check">✓</span> TF-IDF knowledge base & retrieval</li>
+            <li><span class="check">✓</span> Confidence-scored escalation gate</li>
+            <li><span class="check">✓</span> Keyword-based escalation triggers</li>
+            <li><span class="check">✓</span> Multi-turn session history</li>
+            <li><span class="check">✓</span> Cited sources on every answer</li>
+            <li><span class="check">✓</span> Fully configurable prompts &amp; escalation rules</li>
+            <li><span class="check">✓</span> MIT license — use anywhere</li>
+          </ul>
+        </div>
+
+        <!-- SUPPORT -->
+        <div class="plan plan-featured">
+          <div class="plan-header">
+            <div class="plan-name">Support &amp; Consulting</div>
+            <div class="plan-price"><span class="plan-amount">Custom</span></div>
+            <p class="plan-desc">For teams that need it wired into an existing support stack.</p>
+          </div>
+          <a href="mailto:hello@pengkernel.com?subject=DeskPilot Support" class="plan-btn plan-btn-primary">Get in Touch →</a>
+          <p class="plan-contact">hello@pengkernel.com</p>
+          <ul class="plan-features">
+            <li><span class="check">✓</span> Zendesk / Intercom integration</li>
+            <li><span class="check">✓</span> Escalation threshold tuning for your data</li>
+            <li><span class="check">✓</span> Priority email support</li>
+            <li><span class="check">✓</span> Architecture review</li>
+            <li><span class="check">✓</span> Custom channel adapters</li>
+            <li><span class="check">✓</span> Direct access to the author</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section cta-section">
+    <div class="section-inner cta-inner">
+      <h2>Stop your support bot from guessing.</h2>
+      <p>Drop DeskPilot into your support stack in under 10 minutes.</p>
+      <div class="cta-actions">
+        <a href="https://www.npmjs.com/package/deskpilot" target="_blank" class="btn-primary btn-lg">
+          Install on npm →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-left">
+        <span class="logo">
+          <span class="logo-icon">🎧</span>
+          DeskPilot
+        </span>
+        <p>The AI support agent that knows when to escalate.</p>
+        <p class="footer-copy">MIT License · Built by PengKernel LLC</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h5>Package</h5>
+          <a href="https://www.npmjs.com/package/deskpilot" target="_blank">npm</a>
+        </div>
+        <div class="footer-col">
+          <h5>Company</h5>
+          <a href="../../">PengKernel LLC</a>
+          <a href="mailto:hello@pengkernel.com">hello@pengkernel.com</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      if (isDark) {
+        html.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+      } else {
+        html.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+
+    function copyInstall(btn) {
+      navigator.clipboard.writeText('npm install deskpilot');
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(() => {
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
